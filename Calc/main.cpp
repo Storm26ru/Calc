@@ -1,6 +1,47 @@
 #include<Windows.h>
 
+#define IDC_EDIT_DISPLAY	999
+
+#define IDC_BUTTON_0		1000
+#define IDC_BUTTON_1		1001
+#define IDC_BUTTON_2		1002
+#define IDC_BUTTON_3		1003
+#define IDC_BUTTON_4		1004
+#define IDC_BUTTON_5		1005
+#define IDC_BUTTON_6		1006
+#define IDC_BUTTON_7		1007
+#define IDC_BUTTON_8		1008
+#define IDC_BUTTON_9		1009
+#define IDC_BUTTON_POINT	1010
+
+#define IDC_BUTTON_PLUS		1011
+#define IDC_BUTTON_MINUS	1012
+#define IDC_BUTTON_ASTER	1013
+#define IDC_BUTTON_SLASH	1014
+
+#define IDC_BUTTON_BSP		1015
+#define IDC_BUTTON_CLR		1016
+#define IDC_BUTTON_EQUAL	1017
+
 CONST CHAR* g_sz_MY_WINDOW_CLASS = "Calc_VPD_311";
+
+CONST INT g_i_INTERVAL = 5;
+CONST INT g_i_BUTTON_SIZE = 50;
+CONST INT g_i_DBUTTON_SIZE = g_i_BUTTON_SIZE * 2 + g_i_INTERVAL;
+
+CONST INT g_i_SCREEN_WIDTH = g_i_BUTTON_SIZE+(g_i_BUTTON_SIZE+g_i_INTERVAL)*4;
+CONST INT g_i_SCREEN_HEIGHT = 22;
+
+
+CONST INT g_i_START_X = 10;
+CONST INT g_i_START_Y = 10;
+CONST INT g_i_BUTTON_START_X = g_i_START_X;
+CONST INT g_i_BUTTON_START_Y = g_i_START_Y + g_i_SCREEN_HEIGHT + g_i_INTERVAL;
+
+CONST INT g_i_WINDOW_WIDTH = g_i_SCREEN_WIDTH + 36;
+CONST INT g_i_WINDOW_HEIGHT = g_i_SCREEN_HEIGHT + (g_i_BUTTON_SIZE + g_i_INTERVAL) * 4 + 36;
+
+
 INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 
@@ -27,8 +68,8 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		MessageBox(NULL,"Class registration faled",NULL,MB_OK |MB_ICONERROR);
 		return 0;
 	}
-	HWND hWnd = CreateWindowEx(NULL, g_sz_MY_WINDOW_CLASS, g_sz_MY_WINDOW_CLASS, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-		CW_USEDEFAULT, NULL, NULL, hInstance, NULL);
+	HWND hWnd = CreateWindowEx(NULL, g_sz_MY_WINDOW_CLASS, g_sz_MY_WINDOW_CLASS, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,g_i_WINDOW_WIDTH,
+		g_i_WINDOW_HEIGHT, NULL, NULL, hInstance, NULL);
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 	MSG msg;
@@ -45,7 +86,16 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
-	case WM_CREATE:break;
+	case WM_CREATE:
+	{
+		HWND hEdit = CreateWindowEx(NULL, "Edit", "0",
+									WS_CHILD | WS_VISIBLE | WS_BORDER | ES_RIGHT,
+									10, 10, g_i_SCREEN_WIDTH, g_i_SCREEN_HEIGHT, 
+									hWnd,
+									(HMENU)IDC_EDIT_DISPLAY, 
+									GetModuleHandle(NULL), 
+									NULL);
+	}break;
 	case WM_COMMAND:break;
 	case WM_DESTROY: PostQuitMessage(0);
 	case WM_CLOSE:DestroyWindow(hWnd);
