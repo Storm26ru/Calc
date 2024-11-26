@@ -32,7 +32,6 @@ CONST INT g_i_DBUTTON_SIZE = g_i_BUTTON_SIZE * 2 + g_i_INTERVAL;
 CONST INT g_i_SCREEN_WIDTH = g_i_BUTTON_SIZE+(g_i_BUTTON_SIZE+g_i_INTERVAL)*4;
 CONST INT g_i_SCREEN_HEIGHT = 30;
 
-
 CONST INT g_i_START_X = 10;
 CONST INT g_i_START_Y = 10;
 CONST INT g_i_BUTTON_START_X = g_i_START_X;
@@ -40,8 +39,8 @@ CONST INT g_i_BUTTON_START_Y = g_i_START_Y + g_i_SCREEN_HEIGHT + g_i_INTERVAL;
 
 CONST INT g_i_WINDOW_WIDTH = g_i_SCREEN_WIDTH + 36;
 CONST INT g_i_WINDOW_HEIGHT = g_i_SCREEN_HEIGHT + (g_i_BUTTON_SIZE + g_i_INTERVAL) * 4 + 58;
-CONST INT CLAV[4][5]{ {1007,1008,1009,10014,1015},{1004,1005,1006,1013,1016},{1001,1002,1003,1012,1017},{1000,0,1010,1011,0} };
-
+CONST INT CLAV[4][5]{ {1007,1008,1009,1014,1015},{1004,1005,1006,1013,1016},{1001,1002,1003,1012,1017},{1000,0,1010,1011,0} };
+CONST CHAR* CAPTION[4][5] = { {"7","8","9","/","<-"},{"4","5","6","*","C"},{"1","2","3","-","="},{"0","0",",","+","0"} };
 
 INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -58,7 +57,8 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	wClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	wClass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 	wClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wClass.hbrBackground = (HBRUSH)COLOR_WINDOW;
+	//wClass.hbrBackground = (HBRUSH)COLOR_WINDOW;
+	wClass.hbrBackground = CreateSolidBrush(RGB(217,228,241));
 
 	wClass.hInstance = hInstance;
 	wClass.lpszClassName = g_sz_MY_WINDOW_CLASS;
@@ -80,7 +80,6 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		DispatchMessage(&msg);
 	}
 
-
 	return msg.wParam;
 }
 INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -100,24 +99,15 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 			for (int j = 0; j < 5; j++)
 			{
-				CHAR caption[3] = "0";
 				INT BUTTON_WIDTH = g_i_BUTTON_SIZE;
 				INT BUTTON_HEIGHT = g_i_BUTTON_SIZE;
 				if (!CLAV[i][j])continue;
 				switch (CLAV[i][j])
 				{
-				case 1010: caption[0] = ','; break;
-				case 1011: caption[0] = '+'; break;
-				case 1012: caption[0] = '-'; break;
-				case 1013: caption[0] = '*'; break;
-				case 1014: caption[0] = '/'; break;
-				case 1015: caption[0] = '<'; caption[1] = '-'; break;
-				case 1016: caption[0] = 'C'; break;
-				case 1017: caption[0] = '='; BUTTON_HEIGHT+=BUTTON_WIDTH+g_i_INTERVAL ; break;
-				case 1000: caption[0] = 48; BUTTON_WIDTH+=BUTTON_HEIGHT+g_i_INTERVAL; break;
-				default: caption[0] = 48 + CLAV[i][j] - IDC_BUTTON_0;
+				case IDC_BUTTON_EQUAL:  BUTTON_HEIGHT+=BUTTON_WIDTH+g_i_INTERVAL ; break;
+				case IDC_BUTTON_0:  BUTTON_WIDTH+=BUTTON_HEIGHT+g_i_INTERVAL;
 				}
-				CreateWindowEx(NULL, "Button", caption, WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, g_i_BUTTON_START_X + (g_i_BUTTON_SIZE + g_i_INTERVAL) * j,
+				CreateWindowEx(NULL, "Button", CAPTION[i][j], WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, g_i_BUTTON_START_X + (g_i_BUTTON_SIZE + g_i_INTERVAL) * j,
 					g_i_BUTTON_START_Y + (g_i_BUTTON_SIZE + g_i_INTERVAL) * i, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)CLAV[i][j],
 					GetModuleHandle(NULL), NULL);
 			}
