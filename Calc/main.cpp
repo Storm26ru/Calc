@@ -1,7 +1,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include<Windows.h>
 #include"resource.h"
-#include<iostream>
+//#include<iostream>
+#include<stdio.h>
 
 #define IDC_EDIT_DISPLAY	999
 
@@ -87,6 +88,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 }
 INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	static BOOL bOperation = FALSE;
 	switch (uMsg)
 	{
 	case WM_CREATE:
@@ -143,6 +145,32 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)bufer);
 					break;
 				}
+				else
+				{
+				if (bOperation)
+				{
+					bOperation = FALSE;
+					DOUBLE* num = new DOUBLE[2];
+					CHAR* token = strtok(bufer, "+-/*");
+					INT j = 0;
+					while(token)
+					{
+						num[j++] = atof(token);
+						token = strtok(nullptr, "+-/*");
+					}
+					switch(LOWORD(wParam))
+					{
+					case IDC_BUTTON_MINUS:
+						sprintf(bufer,"%g",num[0]-num[1]);
+						SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)bufer);
+					}
+					delete [] num;
+					break;
+				}
+					SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)strcat(bufer, digit));
+					bOperation = TRUE;
+					break;
+				}
 			}
 			if (bufer[0] == '0')SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)digit);
 			else SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)strcat(bufer, digit));
@@ -158,6 +186,18 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					bufer[INDEX] = 0; 
 					SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)bufer);
 				}else SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)"0"); break;
+			case IDC_BUTTON_EQUAL:
+			{
+				DOUBLE* num = new DOUBLE[2]{};
+				CHAR* token = strtok(bufer, "+-/*");
+				INT j = 0;
+				while (token)
+				{
+					num[j++] = atof(token);
+					token = strtok(nullptr, "+-/*");
+				}
+
+			}break;
 			}
 		}
 
