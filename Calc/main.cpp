@@ -1,7 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include<Windows.h>
 #include"resource.h"
-//#include<iostream>
+#include<iostream>
 #include<stdio.h>
 
 #define IDC_EDIT_DISPLAY	999
@@ -44,7 +44,7 @@ CONST INT g_i_BUTTON_START_Y = g_i_START_Y + g_i_SCREEN_HEIGHT + g_i_INTERVAL;
 CONST INT g_i_WINDOW_WIDTH = g_i_SCREEN_WIDTH + 36;
 CONST INT g_i_WINDOW_HEIGHT = g_i_SCREEN_HEIGHT + (g_i_BUTTON_SIZE + g_i_INTERVAL) * 4 + 58;
 CONST INT KEYPAD[4][5]{ {1007,1008,1009,1014,1015},{1004,1005,1006,1013,1016},{1001,1002,1003,1012,1017},{1000,0,1010,1011,0} };
-CONST CHAR* CAPTION[4][5] = { {"7","8","9","/","<-"},{"4","5","6","*","C"},{"1","2","3","-","="},{"0","0",",","+","0"} };
+CONST CHAR* CAPTION[4][5] = { {"7","8","9","/","<-"},{"4","5","6","*","C"},{"1","2","3","-","="},{"0","0",".","+","0"} };
 
 INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -127,14 +127,8 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		CHAR digit[2]{};
 		INT INDEX = SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), EM_LINELENGTH, 0, 0) - 1;
 		SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_GETTEXT, SIZE, (LPARAM)bufer);
-		/*if (LOWORD(wParam) >= IDC_BUTTON_0 && LOWORD(wParam) <= IDC_BUTTON_9)
-		{
-			digit[0] = 48 + LOWORD(wParam) - IDC_BUTTON_0;
-			SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)strcat(bufer, digit));
-		}*/
 		if (LOWORD(wParam) >= IDC_BUTTON_0 && LOWORD(wParam) <= IDC_BUTTON_SLASH)
 		{
-			//digit[0] = 48 + LOWORD(wParam) - IDC_BUTTON_0;
 			SendMessage(GetDlgItem(hWnd, LOWORD(wParam)), WM_GETTEXT, 2, (LPARAM)digit);
 			if (digit[0] >= 42 && digit[0] <= 47)
 			{
@@ -147,28 +141,14 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				}
 				else
 				{
-				if (bOperation)
-				{
-					bOperation = FALSE;
-					DOUBLE* num = new DOUBLE[2];
-					CHAR* token = strtok(bufer, "+-/*");
-					INT j = 0;
-					while(token)
+					if (bOperation&& LOWORD(wParam) != IDC_BUTTON_POINT)
 					{
-						num[j++] = atof(token);
-						token = strtok(nullptr, "+-/*");
+						SendMessage(hWnd, WM_COMMAND, LOWORD(IDC_BUTTON_EQUAL), 0);
+						SendMessage(hWnd, WM_COMMAND, wParam, 0);
+						break;
 					}
-					switch(LOWORD(wParam))
-					{
-					case IDC_BUTTON_MINUS:
-						sprintf(bufer,"%g",num[0]-num[1]);
-						SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)bufer);
-					}
-					delete [] num;
-					break;
-				}
 					SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)strcat(bufer, digit));
-					bOperation = TRUE;
+					if(LOWORD(wParam)!=IDC_BUTTON_POINT)bOperation = TRUE;
 					break;
 				}
 			}
@@ -179,16 +159,39 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 			switch (LOWORD(wParam))
 			{
-			case IDC_BUTTON_CLR: SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)"0"); break;
+			case IDC_BUTTON_CLR:
+				bOperation = FALSE;
+				ZeroMemory(bufer, SIZE);
+				SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)"0");
+				break;
 			case IDC_BUTTON_BSP:
 				if (INDEX)
 				{
-					bufer[INDEX] = 0; 
+					//if (bufer[INDEX] >= 42 && bufer[INDEX] <= 47 && bufer[INDEX] != 46)bOperation = FALSE;
+					if (bufer[INDEX] <= 45 || bufer[INDEX] == 47)bOperation = FALSE;
+					bufer[INDEX] = 0;
 					SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)bufer);
-				}else SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)"0"); break;
+				}
+				else
+				{
+					bOperation = FALSE;
+					ZeroMemory(bufer, SIZE);
+					SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)"0");
+				}break;
 			case IDC_BUTTON_EQUAL:
 			{
+				if (!bOperation)break;
+				bOperation = FALSE;
 				DOUBLE* num = new DOUBLE[2]{};
+				CHAR cOperator;
+				strchr(bufer, '+') ? cOperator = '+' : strchr(bufer, '-') ? cOperator = '-' : strchr(bufer, '*') ? cOperator = '*' : cOperator = '/';
+				if (bufer[INDEX] <= 45 || bufer[INDEX] == 47)
+				{
+					CHAR copy[SIZE]{};
+					strcpy(copy, bufer);
+					copy[INDEX] = 0;
+					strcat(bufer, copy);
+				}
 				CHAR* token = strtok(bufer, "+-/*");
 				INT j = 0;
 				while (token)
@@ -196,7 +199,15 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					num[j++] = atof(token);
 					token = strtok(nullptr, "+-/*");
 				}
-
+				switch (cOperator)
+				{
+				case '+': sprintf(bufer, "%g", num[0] + num[1]); break;
+				case '-': sprintf(bufer, "%g", num[0] - num[1]); break;
+				case '/': sprintf(bufer, "%g", num[0] / num[1]); break;
+				case '*': sprintf(bufer, "%g", num[0] * num[1]);
+				}
+				SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)bufer);
+				delete[] num;
 			}break;
 			}
 		}
