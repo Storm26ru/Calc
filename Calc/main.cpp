@@ -1,48 +1,12 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include<Windows.h>
 #include"resource.h"
+#include"Dimensions.h"
 #include<iostream>
-#include<stdio.h>
-
-#define IDC_EDIT_DISPLAY	999
-
-#define IDC_BUTTON_0		1000
-#define IDC_BUTTON_1		1001
-#define IDC_BUTTON_2		1002
-#define IDC_BUTTON_3		1003
-#define IDC_BUTTON_4		1004
-#define IDC_BUTTON_5		1005
-#define IDC_BUTTON_6		1006
-#define IDC_BUTTON_7		1007
-#define IDC_BUTTON_8		1008
-#define IDC_BUTTON_9		1009
-#define IDC_BUTTON_POINT	1010
-
-#define IDC_BUTTON_PLUS		1011
-#define IDC_BUTTON_MINUS	1012
-#define IDC_BUTTON_ASTER	1013
-#define IDC_BUTTON_SLASH	1014
-
-#define IDC_BUTTON_BSP		1015
-#define IDC_BUTTON_CLR		1016
-#define IDC_BUTTON_EQUAL	1017
+//#include<stdio.h>
 
 CONST CHAR* g_sz_MY_WINDOW_CLASS = "Calc_VPD_311";
 
-CONST INT g_i_INTERVAL = 5;
-CONST INT g_i_BUTTON_SIZE = 50;
-CONST INT g_i_DBUTTON_SIZE = g_i_BUTTON_SIZE * 2 + g_i_INTERVAL;
-
-CONST INT g_i_SCREEN_WIDTH = g_i_BUTTON_SIZE+(g_i_BUTTON_SIZE+g_i_INTERVAL)*4;
-CONST INT g_i_SCREEN_HEIGHT = 30;
-
-CONST INT g_i_START_X = 10;
-CONST INT g_i_START_Y = 10;
-CONST INT g_i_BUTTON_START_X = g_i_START_X;
-CONST INT g_i_BUTTON_START_Y = g_i_START_Y + g_i_SCREEN_HEIGHT + g_i_INTERVAL;
-
-CONST INT g_i_WINDOW_WIDTH = g_i_SCREEN_WIDTH + 36;
-CONST INT g_i_WINDOW_HEIGHT = g_i_SCREEN_HEIGHT + (g_i_BUTTON_SIZE + g_i_INTERVAL) * 4 + 58;
 CONST INT KEYPAD[4][5]{ {1007,1008,1009,1014,1015},{1004,1005,1006,1013,1016},{1001,1002,1003,1012,1017},{1000,0,1010,1011,0} };
 CONST CHAR* CAPTION[4][5] = { {"7","8","9","/","<-"},{"4","5","6","*","C"},{"1","2","3","-","="},{"0","0",".","+","0"} };
 
@@ -73,7 +37,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		MessageBox(NULL,"Class registration faled",NULL,MB_OK |MB_ICONERROR);
 		return 0;
 	}
-	HWND hWnd = CreateWindowEx(NULL, g_sz_MY_WINDOW_CLASS, g_sz_MY_WINDOW_CLASS, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,g_i_WINDOW_WIDTH,
+	HWND hWnd = CreateWindowEx(NULL, g_sz_MY_WINDOW_CLASS, g_sz_MY_WINDOW_CLASS, WS_OVERLAPPEDWINDOW^WS_THICKFRAME^WS_MAXIMIZEBOX, CW_USEDEFAULT, CW_USEDEFAULT,g_i_WINDOW_WIDTH,
 		g_i_WINDOW_HEIGHT, NULL, NULL, hInstance, NULL);
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
@@ -89,6 +53,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	static BOOL bOperation = FALSE;
+	static BOOL bPoint = FALSE;
 	switch (uMsg)
 	{
 	case WM_CREATE:
@@ -122,38 +87,43 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}break;
 	case WM_COMMAND:
 	{
+		HWND hEdit = GetDlgItem(hWnd, IDC_EDIT_DISPLAY);
 		CONST INT SIZE = 256;
 		CHAR bufer[SIZE]{};
 		CHAR digit[2]{};
-		INT INDEX = SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), EM_LINELENGTH, 0, 0) - 1;
-		SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_GETTEXT, SIZE, (LPARAM)bufer);
+		INT INDEX = SendMessage(hEdit, EM_LINELENGTH, 0, 0) - 1;
+		SendMessage(hEdit, WM_GETTEXT, SIZE, (LPARAM)bufer);
 		if (LOWORD(wParam) >= IDC_BUTTON_0 && LOWORD(wParam) <= IDC_BUTTON_SLASH)
 		{
 			SendMessage(GetDlgItem(hWnd, LOWORD(wParam)), WM_GETTEXT, 2, (LPARAM)digit);
 			if (digit[0] >= 42 && digit[0] <= 47)
 			{
-				if (bufer[0] == '0')break;
+				if (LOWORD(wParam) == IDC_BUTTON_POINT)
+				{
+					if (strchr(bufer,'.')&&!bOperation) break;
+
+				}
 				if (bufer[INDEX] >= 42 && bufer[INDEX] <= 47)
 				{
 					bufer[INDEX] = digit[0];
-					SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)bufer);
+					SendMessage(hEdit, WM_SETTEXT, 0, (LPARAM)bufer);
 					break;
 				}
 				else
 				{
-					if (bOperation&& LOWORD(wParam) != IDC_BUTTON_POINT)
+					if (bOperation && LOWORD(wParam) != IDC_BUTTON_POINT)
 					{
 						SendMessage(hWnd, WM_COMMAND, LOWORD(IDC_BUTTON_EQUAL), 0);
 						SendMessage(hWnd, WM_COMMAND, wParam, 0);
 						break;
 					}
-					SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)strcat(bufer, digit));
-					if(LOWORD(wParam)!=IDC_BUTTON_POINT)bOperation = TRUE;
+					SendMessage(hEdit, WM_SETTEXT, 0, (LPARAM)strcat(bufer, digit));
+					if (LOWORD(wParam) != IDC_BUTTON_POINT)bOperation = TRUE;
 					break;
 				}
 			}
-			if (bufer[0] == '0')SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)digit);
-			else SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)strcat(bufer, digit));
+			if (strlen(bufer) == 1 && bufer[0]=='0')SendMessage(hEdit, WM_SETTEXT, 0, (LPARAM)digit);
+			else SendMessage(hEdit, WM_SETTEXT, 0, (LPARAM)strcat(bufer, digit));
 		}
 		else
 		{
@@ -162,7 +132,7 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			case IDC_BUTTON_CLR:
 				bOperation = FALSE;
 				ZeroMemory(bufer, SIZE);
-				SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)"0");
+				SendMessage(hEdit, WM_SETTEXT, 0, (LPARAM)"0");
 				break;
 			case IDC_BUTTON_BSP:
 				if (INDEX)
@@ -170,13 +140,13 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					//if (bufer[INDEX] >= 42 && bufer[INDEX] <= 47 && bufer[INDEX] != 46)bOperation = FALSE;
 					if (bufer[INDEX] <= 45 || bufer[INDEX] == 47)bOperation = FALSE;
 					bufer[INDEX] = 0;
-					SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)bufer);
+					SendMessage(hEdit, WM_SETTEXT, 0, (LPARAM)bufer);
 				}
 				else
 				{
 					bOperation = FALSE;
 					ZeroMemory(bufer, SIZE);
-					SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)"0");
+					SendMessage(hEdit, WM_SETTEXT, 0, (LPARAM)"0");
 				}break;
 			case IDC_BUTTON_EQUAL:
 			{
@@ -206,7 +176,7 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				case '/': sprintf(bufer, "%g", num[0] / num[1]); break;
 				case '*': sprintf(bufer, "%g", num[0] * num[1]);
 				}
-				SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETTEXT, 0, (LPARAM)bufer);
+				SendMessage(hEdit, WM_SETTEXT, 0, (LPARAM)bufer);
 				delete[] num;
 			}break;
 			}
