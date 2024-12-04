@@ -100,11 +100,25 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			{
 				if (LOWORD(wParam) == IDC_BUTTON_POINT)
 				{
-					if (strchr(bufer,'.')&&!bOperation) break;
-
+					if (strchr(bufer, '.') && !bOperation)break;
+					if (!bOperation)bPoint = TRUE;
+					if (bPoint)
+					{
+						if (strrchr(bufer, '.') && strchr(bufer, '.') != strrchr(bufer, '.'))break;
+					}
+					else
+					{
+						if (strchr(bufer, '.'))break;
+					}
 				}
-				if (bufer[INDEX] >= 42 && bufer[INDEX] <= 47)
+
+				if (bufer[INDEX] <= 45 || bufer[INDEX] == 47)
 				{
+					if (LOWORD(wParam) == IDC_BUTTON_POINT)
+					{
+						bufer[++INDEX] = '0';
+						++INDEX;
+					}
 					bufer[INDEX] = digit[0];
 					SendMessage(hEdit, WM_SETTEXT, 0, (LPARAM)bufer);
 					break;
@@ -122,7 +136,7 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					break;
 				}
 			}
-			if (strlen(bufer) == 1 && bufer[0]=='0')SendMessage(hEdit, WM_SETTEXT, 0, (LPARAM)digit);
+			if (strlen(bufer) == 1 && bufer[0] == '0')SendMessage(hEdit, WM_SETTEXT, 0, (LPARAM)digit);
 			else SendMessage(hEdit, WM_SETTEXT, 0, (LPARAM)strcat(bufer, digit));
 		}
 		else
@@ -137,7 +151,6 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			case IDC_BUTTON_BSP:
 				if (INDEX)
 				{
-					//if (bufer[INDEX] >= 42 && bufer[INDEX] <= 47 && bufer[INDEX] != 46)bOperation = FALSE;
 					if (bufer[INDEX] <= 45 || bufer[INDEX] == 47)bOperation = FALSE;
 					bufer[INDEX] = 0;
 					SendMessage(hEdit, WM_SETTEXT, 0, (LPARAM)bufer);
@@ -162,7 +175,9 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					copy[INDEX] = 0;
 					strcat(bufer, copy);
 				}
-				CHAR* token = strtok(bufer, "+-/*");
+				CHAR* token = nullptr;
+				if (bufer[0] == '-')token = strtok(bufer, "+/*");
+				else token = strtok(bufer, "+-/*");
 				INT j = 0;
 				while (token)
 				{
