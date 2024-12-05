@@ -93,9 +93,9 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		CHAR digit[2]{};
 		INT INDEX = SendMessage(hEdit, EM_LINELENGTH, 0, 0) - 1;
 		SendMessage(hEdit, WM_GETTEXT, SIZE, (LPARAM)bufer);
+		SendMessage(GetDlgItem(hWnd, LOWORD(wParam)), WM_GETTEXT, 2, (LPARAM)digit);
 		if (LOWORD(wParam) >= IDC_BUTTON_0 && LOWORD(wParam) <= IDC_BUTTON_SLASH)
 		{
-			SendMessage(GetDlgItem(hWnd, LOWORD(wParam)), WM_GETTEXT, 2, (LPARAM)digit);
 			if (digit[0] >= 42 && digit[0] <= 47)
 			{
 				if (LOWORD(wParam) == IDC_BUTTON_POINT)
@@ -175,15 +175,14 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					copy[INDEX] = 0;
 					strcat(bufer, copy);
 				}
-				CHAR* token = nullptr;
-				if (bufer[0] == '-')token = strtok(bufer, "+/*");
-				else token = strtok(bufer, "+-/*");
+				CHAR* token = strtok(bufer, "+-/*");
 				INT j = 0;
 				while (token)
 				{
 					num[j++] = atof(token);
 					token = strtok(nullptr, "+-/*");
 				}
+				if (bufer[0] == '-')num[0] *= -1;
 				switch (cOperator)
 				{
 				case '+': sprintf(bufer, "%g", num[0] + num[1]); break;
@@ -196,9 +195,17 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}break;
 			}
 		}
-
+		SetFocus(hWnd);
 	}
 	break;
+	case WM_KEYDOWN:
+		switch (wParam)
+		{
+		case VK_RETURN:SendMessage(hWnd, WM_COMMAND, LOWORD(IDC_BUTTON_EQUAL), 0); break;
+
+		}break;
+
+	
 	case WM_DESTROY: PostQuitMessage(0);
 	case WM_CLOSE:DestroyWindow(hWnd);
 	default: return DefWindowProc(hWnd, uMsg, wParam, lParam);
