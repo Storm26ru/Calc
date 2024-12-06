@@ -165,9 +165,10 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			{
 				if (!bOperation)break;
 				bOperation = FALSE;
-				DOUBLE* num = new DOUBLE[2]{};
+				//DOUBLE* num = new DOUBLE[2]{};
+				DOUBLE num[2]{}; //= new DOUBLE[2]{};
 				CHAR cOperator;
-				strchr(bufer, '+') ? cOperator = '+' : strchr(bufer, '-') ? cOperator = '-' : strchr(bufer, '*') ? cOperator = '*' : cOperator = '/';
+				strchr(bufer, '+') ? cOperator = '+' : strchr(bufer, '*') ? cOperator = '*' : strchr(bufer, '/') ? cOperator = '/' : cOperator = '-';
 				if (bufer[INDEX] <= 45 || bufer[INDEX] == 47)
 				{
 					CHAR copy[SIZE]{};
@@ -191,7 +192,7 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				case '*': sprintf(bufer, "%g", num[0] * num[1]);
 				}
 				SendMessage(hEdit, WM_SETTEXT, 0, (LPARAM)bufer);
-				delete[] num;
+				//delete[] num;
 			}break;
 			}
 		}
@@ -199,13 +200,16 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	break;
 	case WM_KEYDOWN:
-		switch (wParam)
-		{
-		case VK_RETURN:SendMessage(hWnd, WM_COMMAND, LOWORD(IDC_BUTTON_EQUAL), 0); break;
+		if(wParam==)
+	if (wParam >= '0' && wParam <= '9')SendMessage(hWnd, WM_COMMAND, wParam-'0' + IDC_BUTTON_0, 0);
+	if (wParam >= 0x60 && wParam <= 0x69)SendMessage(hWnd, WM_COMMAND, wParam-0x60 + IDC_BUTTON_0, 0);
+	switch (wParam)
+	{
 
-		}break;
+	case VK_RETURN:SendMessage(hWnd, WM_COMMAND, IDC_BUTTON_EQUAL, 0);break;
 
-	
+	}break;
+
 	case WM_DESTROY: PostQuitMessage(0);
 	case WM_CLOSE:DestroyWindow(hWnd);
 	default: return DefWindowProc(hWnd, uMsg, wParam, lParam);
