@@ -101,10 +101,9 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				if (LOWORD(wParam) == IDC_BUTTON_POINT)
 				{
 					if (strchr(bufer, '.') && !bOperation)break;
-					if (!bOperation)bPoint = TRUE;
 					if (bPoint)
 					{
-						if (strrchr(bufer, '.') && strchr(bufer, '.') != strrchr(bufer, '.'))break;
+						if (bPoint && strchr(bufer, '.') != strrchr(bufer, '.'))break;
 					}
 					else
 					{
@@ -132,7 +131,11 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 						break;
 					}
 					SendMessage(hEdit, WM_SETTEXT, 0, (LPARAM)strcat(bufer, digit));
-					if (LOWORD(wParam) != IDC_BUTTON_POINT)bOperation = TRUE;
+					if (LOWORD(wParam) != IDC_BUTTON_POINT)
+					{
+						bOperation = TRUE;
+						if (strchr(bufer, '.'))bPoint = TRUE;
+					}
 					break;
 				}
 			}
@@ -145,6 +148,7 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			{
 			case IDC_BUTTON_CLR:
 				bOperation = FALSE;
+				bPoint = FALSE;
 				ZeroMemory(bufer, SIZE);
 				SendMessage(hEdit, WM_SETTEXT, 0, (LPARAM)"0");
 				break;
@@ -165,8 +169,7 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			{
 				if (!bOperation)break;
 				bOperation = FALSE;
-				//DOUBLE* num = new DOUBLE[2]{};
-				DOUBLE num[2]{}; //= new DOUBLE[2]{};
+				DOUBLE num[2]{}; 
 				CHAR cOperator;
 				strchr(bufer, '+') ? cOperator = '+' : strchr(bufer, '*') ? cOperator = '*' : strchr(bufer, '/') ? cOperator = '/' : cOperator = '-';
 				if (bufer[INDEX] <= 45 || bufer[INDEX] == 47)
@@ -192,7 +195,6 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				case '*': sprintf(bufer, "%g", num[0] * num[1]);
 				}
 				SendMessage(hEdit, WM_SETTEXT, 0, (LPARAM)bufer);
-				//delete[] num;
 			}break;
 			}
 		}
@@ -200,15 +202,31 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	break;
 	case WM_KEYDOWN:
-		if(wParam==)
-	if (wParam >= '0' && wParam <= '9')SendMessage(hWnd, WM_COMMAND, wParam-'0' + IDC_BUTTON_0, 0);
-	if (wParam >= 0x60 && wParam <= 0x69)SendMessage(hWnd, WM_COMMAND, wParam-0x60 + IDC_BUTTON_0, 0);
 	switch (wParam)
 	{
-
-	case VK_RETURN:SendMessage(hWnd, WM_COMMAND, IDC_BUTTON_EQUAL, 0);break;
-
-	}break;
+	case VK_ADD:
+	case VK_OEM_PLUS:wParam = IDC_BUTTON_PLUS;break;
+	case VK_SUBTRACT:
+	case VK_OEM_MINUS:wParam = IDC_BUTTON_MINUS;break;
+	case VK_MULTIPLY:wParam = IDC_BUTTON_ASTER; break;
+	case VK_DIVIDE:
+	case VK_OEM_2:wParam = IDC_BUTTON_SLASH; break;
+	case VK_DECIMAL:
+	case VK_OEM_PERIOD:wParam = IDC_BUTTON_POINT; break;
+	case VK_BACK: wParam = IDC_BUTTON_BSP; break;
+	case VK_ESCAPE: wParam = IDC_BUTTON_CLR; break;
+	case VK_RETURN:wParam = IDC_BUTTON_EQUAL; break;
+	}
+		if (GetKeyState(VK_SHIFT) < 0)
+		{
+			if (wParam == '8') wParam = IDC_BUTTON_ASTER;
+		}
+		else
+		{
+			if (wParam >= '0' && wParam <= '9')wParam=wParam -'0' + IDC_BUTTON_0;
+			if (wParam >= 0x60 && wParam <= 0x69)wParam=wParam - 0x60 + IDC_BUTTON_0;
+		}
+	SendMessage(hWnd, WM_COMMAND, wParam, 0); break;
 
 	case WM_DESTROY: PostQuitMessage(0);
 	case WM_CLOSE:DestroyWindow(hWnd);
