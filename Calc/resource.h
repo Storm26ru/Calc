@@ -2,7 +2,7 @@
 // Microsoft Visual C++ generated include file.
 // Used by Resource.rc
 //
-#define IDI_ICON1                       106
+#define IDI_ICON1           106
 #define IDC_EDIT_DISPLAY	999
 
 #define IDC_BUTTON_0		1000
