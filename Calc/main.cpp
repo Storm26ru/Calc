@@ -12,6 +12,7 @@ CONST CHAR* CAPTION[4][5] = { {"7","8","9","/","<-"},{"4","5","6","*","C"},{"1",
 CONST CHAR* g_OPERATION[]{ "+","-","*","/" };
 
 INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+VOID SetSkin(HWND hWnd, CONST CHAR* skin);
 
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, INT nCmdShow)
@@ -26,7 +27,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	wClass.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
 	wClass.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
 	wClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wClass.hbrBackground = CreateSolidBrush(RGB(217, 228, 241));
+	wClass.hbrBackground = CreateSolidBrush(RGB(159,156,148));//(RGB(217, 228, 241))RGB(0, 76, 138)
 
 	wClass.hInstance = hInstance;
 	wClass.lpszClassName = g_sz_WINDOW_CLASS;
@@ -77,13 +78,14 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				case IDC_BUTTON_EQUAL:  BUTTON_HEIGHT += BUTTON_WIDTH + g_i_INTERVAL; break;
 				case IDC_BUTTON_0:  BUTTON_WIDTH += BUTTON_HEIGHT + g_i_INTERVAL;
 				}
-				CreateWindowEx(NULL, "Button", CAPTION[i][j], WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+				CreateWindowEx(NULL, "Button", CAPTION[i][j], WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON|BS_BITMAP,
 					g_i_BUTTON_START_X + (g_i_BUTTON_SIZE + g_i_INTERVAL) * j,
 					g_i_BUTTON_START_Y + (g_i_BUTTON_SIZE + g_i_INTERVAL) * i,
 					BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)KEYPAD[i][j], GetModuleHandle(NULL), NULL);
 			}
 		}
-
+		//SetSkin(hWnd, "square_blue");
+		SetSkin(hWnd, "metal_mistral");
 	}break;
 	case WM_COMMAND:
 	{
@@ -157,8 +159,7 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			SendMessage(hEditDisplay, WM_SETTEXT, 0, (LPARAM)sz_display);
 		}
 
-
-
+		SetFocus(hWnd);
 	}break;
 	case WM_KEYDOWN:
 		switch (wParam)
@@ -191,5 +192,26 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_CLOSE: DestroyWindow(hWnd);
 	default: return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
+
 	return FALSE;
+}
+
+CONST CHAR* button_image[]{"button_0","button_1","button_2","button_3","button_4","button_5",
+							"button_6","button_7","button_8","button_9","button_point","button_plus",
+							"button_minus","button_aster","button_slash","button_bsp","button_clr","button_equal" };
+
+VOID SetSkin(HWND hWnd, CONST CHAR* skin)
+{
+	CHAR Filename[FILENAME_MAX]{}; https://learn.microsoft.com/ru-ru/cpp/c-runtime-library/filename-max?view=msvc-17
+for (int i = 0; i < 18; i++)
+{
+	sprintf(Filename, "ButtonBMP\\%s\\%s.bmp", skin, button_image[i]);
+	HWND hButton = GetDlgItem(hWnd, IDC_BUTTON_0 + i);
+	HBITMAP hImage = (HBITMAP)LoadImage(NULL, Filename, IMAGE_BITMAP, 
+						i+IDC_BUTTON_0==IDC_BUTTON_0? g_i_BUTTON_SIZE*2+ g_i_INTERVAL: g_i_BUTTON_SIZE, 
+						i+IDC_BUTTON_0 == IDC_BUTTON_EQUAL ? g_i_BUTTON_SIZE * 2 + g_i_INTERVAL : g_i_BUTTON_SIZE, LR_LOADFROMFILE);
+	SendMessage(hButton, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hImage);
+}
+
+
 }
