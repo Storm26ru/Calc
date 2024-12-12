@@ -4,6 +4,7 @@
 #include"Dimensions.h"
 #include<float.h>
 #include<cstdio>
+#include<windowsx.h>
 
 CONST CHAR* g_sz_WINDOW_CLASS = "Calc_VPD_311";
 
@@ -66,6 +67,10 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			(HMENU)IDC_EDIT_DISPLAY,
 			GetModuleHandle(NULL),
 			NULL);
+		//https://learn.microsoft.com/ru-ru/windows/win32/gdi/font-and-text-functions
+		AddFontResourceEx("Fonts\\Calc_2.ttf", FR_PRIVATE, 0);
+		HFONT hFont = CreateFont(32, 12,0,0,FW_BOLD,FALSE,FALSE,FALSE,ANSI_CHARSET,OUT_TT_PRECIS,CLIP_TT_ALWAYS, CLEARTYPE_QUALITY,FF_DONTCARE,"DiamanteSerial-Light");
+		SendMessage(hEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
 		for (int i = 0; i < 4; i++)
 		{
 			for (int j = 0; j < 5; j++)
@@ -84,8 +89,8 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)KEYPAD[i][j], GetModuleHandle(NULL), NULL);
 			}
 		}
-		//SetSkin(hWnd, "square_blue");
-		SetSkin(hWnd, "metal_mistral");
+		SetSkin(hWnd, "square_blue");
+		//SetSkin(hWnd, "metal_mistral");
 	}break;
 	case WM_COMMAND:
 	{
@@ -188,6 +193,12 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		SendMessage(hWnd, WM_COMMAND, wParam, 0); 
 	break;
+	case WM_CONTEXTMENU:
+	{	HMENU hMenu = CreatePopupMenu();
+		InsertMenu(hMenu, 0, MF_BYPOSITION | MF_STRING, 0, "Привет");
+
+		TrackPopupMenuEx(hMenu, TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RETURNCMD, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), hWnd, NULL);
+	}break;
 	case WM_DESTROY: PostQuitMessage(0);
 	case WM_CLOSE: DestroyWindow(hWnd);
 	default: return DefWindowProc(hWnd, uMsg, wParam, lParam);
