@@ -217,8 +217,8 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), hWnd, NULL);
 		switch (skin_index)
 		{
-		case IDR_SQUARE_BLUE:SetSkin(hWnd, "square_blue");break;
-		case IDR_METAL_MISTRAL: SetSkin(hWnd, "metal_mistral"); break;
+		//case IDR_SQUARE_BLUE:SetSkin(hWnd, "square_blue");break;
+		//case IDR_METAL_MISTRAL: SetSkin(hWnd, "metal_mistral"); break;
 		case IDR_DIAMANTE_SERIAL_LIGHT:
 		{
 			HFONT hFont = CreateFont(32, 12, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_TT_ALWAYS, CLEARTYPE_QUALITY, FF_DONTCARE, "DiamanteSerial-Light");
