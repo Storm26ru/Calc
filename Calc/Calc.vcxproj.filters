@@ -33,7 +33,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\..\..\..\ico\7.ico">
+    <Image Include="..\..\..\..\..\..\ico\сalculator.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
