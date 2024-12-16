@@ -143,7 +143,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Dimensions.h" />
-    <ClInclude Include="resource.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="Skins.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc" />

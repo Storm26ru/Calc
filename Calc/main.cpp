@@ -2,6 +2,7 @@
 #include<Windows.h>
 #include"resource.h"
 #include"Dimensions.h"
+#include"Skins.h"
 #include<float.h>
 #include<cstdio>
 #include<windowsx.h>
@@ -11,10 +12,6 @@ CONST CHAR* g_sz_WINDOW_CLASS = "Calc_VPD_311";
 CONST INT KEYPAD[4][5]{ {1007,1008,1009,1014,1015},{1004,1005,1006,1013,1016},{1001,1002,1003,1012,1017},{1000,0,1010,1011,0} };
 CONST CHAR* CAPTION[4][5] = { {"7","8","9","/","<-"},{"4","5","6","*","C"},{"1","2","3","-","="},{"0","0",".","+","0"} };
 CONST CHAR* g_OPERATION[]{ "+","-","*","/" };
-CONST COLORREF EDIT_BACKGROUND[] = { RGB(0,0, 240), RGB(0,  128, 64) };
-CONST COLORREF FONT[] = { RGB(255, 255, 255), RGB(255, 0, 0) };
-CONST COLORREF WIN_BACKGROUND[] = { RGB(0, 0, 150), RGB(75,  75, 75) };
-CONST CHAR* File[]{ "square_blue","metal_mistral" };
 
 INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 VOID SetSkin(HWND hWnd, CONST CHAR* skin);
@@ -26,13 +23,13 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	ZeroMemory(&wClass, sizeof(wClass));
 	wClass.style = 0;
 	wClass.cbSize = sizeof(wClass);
-	wClass.cbClsExtra = 24;
-	wClass.cbWndExtra = 24;
+	wClass.cbClsExtra = 0;
+	wClass.cbWndExtra = 0;
 
 	wClass.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
 	wClass.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
 	wClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wClass.hbrBackground = CreateSolidBrush(RGB(159, 156, 148));
+	wClass.hbrBackground = CreateSolidBrush(RGB(255, 255, 255));
 
 	wClass.hInstance = hInstance;
 	wClass.lpszClassName = g_sz_WINDOW_CLASS;
@@ -76,7 +73,8 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		
 		AddFontResourceEx("Fonts\\Calc_2.ttf", FR_PRIVATE, 0);//https://learn.microsoft.com/ru-ru/windows/win32/gdi/font-and-text-functions
 		AddFontResourceEx("Fonts\\Pocket_Calculator.ttf", FR_PRIVATE, 0);
-		HFONT hFont = CreateFont(32, 12, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_TT_ALWAYS, CLEARTYPE_QUALITY, FF_DONTCARE, "DiamanteSerial-Light");
+		AddFontResourceEx("Fonts\\MOSCOW2024.otf", FR_PRIVATE, 0);
+		HFONT hFont = CreateFont(32, 12, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_TT_ALWAYS, CLEARTYPE_QUALITY, FF_DONTCARE, "MOSCOW2024");
 		SendMessage(hEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
 
 		for (int i = 0; i < 4; i++)
@@ -97,12 +95,11 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)KEYPAD[i][j], GetModuleHandle(NULL), NULL);
 			}
 		}
-		//SetSkin(hWnd, "square_blue");
-		//SetSkin(hWnd, "metal_mistral");
+		SetSkin(hWnd, "square_blue");
 	}break;
 	case WM_COMMAND:
 	{
-		static DOUBLE a = DBL_MIN;
+		static DOUBLE a = 0;
 		static DOUBLE b = DBL_MIN;
 		static WORD operation = 0;
 		static BOOL input = FALSE;
@@ -199,78 +196,94 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if (wParam >= '0' && wParam <= '9')wParam = wParam - '0' + IDC_BUTTON_0;
 			if (wParam >= 0x60 && wParam <= 0x69)wParam = wParam - 0x60 + IDC_BUTTON_0;
 		}
+		SendMessage(GetDlgItem(hWnd, wParam), BM_SETSTATE, TRUE, 0);
+		break;
+	case WM_KEYUP:
+		switch (wParam)
+		{
+		case VK_ADD:
+		case VK_OEM_PLUS:wParam = IDC_BUTTON_PLUS; break;
+		case VK_SUBTRACT:
+		case VK_OEM_MINUS:wParam = IDC_BUTTON_MINUS; break;
+		case VK_MULTIPLY:wParam = IDC_BUTTON_ASTER; break;
+		case VK_DIVIDE:
+		case VK_OEM_2:wParam = IDC_BUTTON_SLASH; break;
+		case VK_DECIMAL:
+		case VK_OEM_PERIOD:wParam = IDC_BUTTON_POINT; break;
+		case VK_BACK: wParam = IDC_BUTTON_BSP; break;
+		case VK_ESCAPE: wParam = IDC_BUTTON_CLR; break;
+		case VK_RETURN:wParam = IDC_BUTTON_EQUAL; break;
+		}
+		if (GetKeyState(VK_SHIFT) < 0)
+		{
+			if (wParam == '8') wParam = IDC_BUTTON_ASTER;
+		}
+		else
+		{
+			if (wParam >= '0' && wParam <= '9')wParam = wParam - '0' + IDC_BUTTON_0;
+			if (wParam >= 0x60 && wParam <= 0x69)wParam = wParam - 0x60 + IDC_BUTTON_0;
+		}
 		SendMessage(hWnd, WM_COMMAND, wParam, 0);
+		SendMessage(GetDlgItem(hWnd, wParam), BM_SETSTATE, FALSE, 0);
 		break;
 	case WM_CONTEXTMENU:
 	{
 		HMENU hSubMenuSkin = CreatePopupMenu();
 		InsertMenu(hSubMenuSkin, 0, MF_BYPOSITION | MF_STRING, IDR_SQUARE_BLUE, "Square_blue");
 		InsertMenu(hSubMenuSkin, 1, MF_BYPOSITION | MF_STRING, IDR_METAL_MISTRAL, "Metal_mistral");
+		CheckMenuItem(hSubMenuSkin,color_index, MF_BYPOSITION|MF_CHECKED);
 		HMENU hSubMenuFont = CreatePopupMenu();
 		InsertMenu(hSubMenuFont, 0, MF_BYPOSITION | MF_STRING, IDR_DIAMANTE_SERIAL_LIGHT, "Diamante_Serial_Light");
 		InsertMenu(hSubMenuFont, 1, MF_BYPOSITION | MF_STRING, IDR_Pocket_CALCULATOR, "Pocket_Calculator");
+		InsertMenu(hSubMenuFont, 2, MF_BYPOSITION | MF_STRING, IDR_MOSCOW2024, "Moscow2024");
+		CheckMenuItem(hSubMenuFont, IDR_MOSCOW2024, MF_CHECKED);
 		HMENU hMenu = CreatePopupMenu();
 		InsertMenu(hMenu, 0, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hSubMenuSkin, "Skin");
 		InsertMenu(hMenu, 1, MF_BYPOSITION | MF_SEPARATOR, 0, 0);
 		InsertMenu(hMenu, 2, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hSubMenuFont, "Font");
+		InsertMenu(hMenu, 3, MF_BYPOSITION | MF_SEPARATOR, 0, 0);
+		InsertMenu(hMenu, 4, MF_BYPOSITION | MF_BYPOSITION|MF_STRING, IDR_EXIT, "Exit");
 		BOOL skin_index = TrackPopupMenuEx(hMenu, TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RETURNCMD,
 			GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), hWnd, NULL);
 		switch (skin_index)
 		{
-		//case IDR_SQUARE_BLUE:SetSkin(hWnd, "square_blue");break;
-		//case IDR_METAL_MISTRAL: SetSkin(hWnd, "metal_mistral"); break;
-		case IDR_DIAMANTE_SERIAL_LIGHT:
-		{
-			HFONT hFont = CreateFont(32, 12, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_TT_ALWAYS, CLEARTYPE_QUALITY, FF_DONTCARE, "DiamanteSerial-Light");
-			SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETFONT, (WPARAM)hFont, TRUE);
-		}break;
-		case IDR_Pocket_CALCULATOR:
-		{
-			HFONT hFont = CreateFont(32, 12, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_TT_ALWAYS, CLEARTYPE_QUALITY, FF_DONTCARE, "Pocket Calculator");
-			SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETFONT, (WPARAM)hFont, TRUE);
-
-		}
-		
-		}
-			DestroyMenu(hSubMenuSkin);
-			DestroyMenu(hSubMenuFont);
-			DestroyMenu(hMenu);
-		if (skin_index >= IDR_SQUARE_BLUE && skin_index <= IDR_METAL_MISTRAL)
+		case IDR_SQUARE_BLUE:
+		case IDR_METAL_MISTRAL:// color_index = skin_index - IDR_SQUARE_BLUE; 
 		{
 			color_index = skin_index - IDR_SQUARE_BLUE;
-
 			HWND hEditDisplay = GetDlgItem(hWnd, IDC_EDIT_DISPLAY);
 			HDC hdcDisplay = GetDC(hEditDisplay);
 			//SendMessage(hWnd, WM_CTLCOLOREDIT, (WPARAM)GetDC(GetDlgItem(hWnd, IDC_EDIT_DISPLAY)), (LPARAM)GetDlgItem(hWnd, IDC_EDIT_DISPLAY));
 			SendMessage(hWnd, WM_CTLCOLOREDIT, (WPARAM)hdcDisplay, (LPARAM)hEditDisplay);
 			ReleaseDC(hEditDisplay, hdcDisplay);
+			//SetSkin(hWnd, File[color_index]);
 		}
+		break;
+		case IDR_DIAMANTE_SERIAL_LIGHT:
+		case IDR_Pocket_CALCULATOR:
+		case IDR_MOSCOW2024:
+		{
+			HFONT hFont = CreateFont(32, 12, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_TT_ALWAYS, CLEARTYPE_QUALITY, FF_DONTCARE, SKINFONT[skin_index - IDR_DIAMANTE_SERIAL_LIGHT]);
+			SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETFONT, (WPARAM)hFont, TRUE);
+		}break;
+		case IDR_EXIT: DestroyWindow(hWnd);
+		}
+		DestroyMenu(hSubMenuSkin);
+		DestroyMenu(hSubMenuFont);
+		DestroyMenu(hMenu);
+		SetSkin(hWnd, File[color_index]);
 	}break;
 	case WM_CTLCOLOREDIT:
 	{
-		//if (GetDlgCtrlID((HWND)lParam)==IDC_EDIT_DISPLAY);
-		//{
-		//	SetTextColor((HDC)wParam, RGB(0, 255, 0));
-		//	SetBkColor((HDC)wParam, RGB(41, 41, 41));
-		//	//SetSkin(hWnd, "square_blue");
-		//	HBRUSH hbrBackground = CreateSolidBrush(RGB(0, 98,161));
-		//	SetClassLongPtr(hWnd, GCLP_HBRBACKGROUND, (LONG)CreateSolidBrush(RGB(0, 98, 161)));
-		//	/*InvalidateRect(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), NULL, TRUE);
-		//	UpdateWindow(hWnd);*/
-		//	SendMessage(hWnd, WM_ERASEBKGND, wParam, 0);
-		//	SetFocus(GetDlgItem(hWnd, IDC_EDIT_DISPLAY));
-		//	return (LRESULT)hbrBackground;
-		//}
-	
-		//if (GetDlgItem(hWnd, IDC_EDIT_DISPLAY) ==(HWND) lParam);
+		
 		if (GetDlgCtrlID((HWND)lParam) == IDC_EDIT_DISPLAY);
 		{
 			SetTextColor((HDC)wParam, FONT[color_index]);
 			SetBkColor((HDC)wParam, EDIT_BACKGROUND[color_index]);
-			SetSkin(hWnd, File[color_index]);
 			HBRUSH hbrBackground = CreateSolidBrush(WIN_BACKGROUND[color_index]);
 			SetClassLongPtr(hWnd, GCLP_HBRBACKGROUND, (LONG)CreateSolidBrush(WIN_BACKGROUND[color_index]));
 			SendMessage(hWnd, WM_ERASEBKGND, wParam, 0);
+			RedrawWindow(hWnd, NULL, NULL, RDW_ERASE);
 			SetFocus(GetDlgItem(hWnd, IDC_EDIT_DISPLAY));
 			return (LRESULT)hbrBackground;
 		}

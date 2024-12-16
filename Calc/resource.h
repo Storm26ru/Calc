@@ -6,8 +6,10 @@
 
 #define IDR_SQUARE_BLUE                 110
 #define IDR_METAL_MISTRAL               111
-#define IDR_Pocket_CALCULATOR           112
-#define IDR_DIAMANTE_SERIAL_LIGHT       113
+#define IDR_DIAMANTE_SERIAL_LIGHT       112
+#define IDR_Pocket_CALCULATOR           113
+#define IDR_MOSCOW2024				    114
+#define IDR_EXIT					    115
 
 #define IDC_EDIT_DISPLAY                999
 #define IDC_BUTTON_0                    1000
@@ -34,7 +36,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        114
+#define _APS_NEXT_RESOURCE_VALUE        116
 #define _APS_NEXT_COMMAND_VALUE         40002
 #define _APS_NEXT_CONTROL_VALUE         1001
 #define _APS_NEXT_SYMED_VALUE           101
