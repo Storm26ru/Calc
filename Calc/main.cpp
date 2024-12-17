@@ -15,6 +15,7 @@ CONST CHAR* g_OPERATION[]{ "+","-","*","/" };
 
 INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 VOID SetSkin(HWND hWnd, CONST CHAR* skin);
+VOID SetSkinFromDll(HWND hWnd, CONST CHAR* skin);
 
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, INT nCmdShow)
@@ -59,6 +60,7 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	
 	static INT color_index = 0;
+	static INT font_index = 2;
 	switch (uMsg)
 	{
 	case WM_CREATE:
@@ -236,7 +238,7 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		InsertMenu(hSubMenuFont, 0, MF_BYPOSITION | MF_STRING, IDR_DIAMANTE_SERIAL_LIGHT, "Diamante_Serial_Light");
 		InsertMenu(hSubMenuFont, 1, MF_BYPOSITION | MF_STRING, IDR_Pocket_CALCULATOR, "Pocket_Calculator");
 		InsertMenu(hSubMenuFont, 2, MF_BYPOSITION | MF_STRING, IDR_MOSCOW2024, "Moscow2024");
-		CheckMenuItem(hSubMenuFont, IDR_MOSCOW2024, MF_CHECKED);
+		CheckMenuItem(hSubMenuFont, font_index,MF_BYPOSITION| MF_CHECKED);
 		HMENU hMenu = CreatePopupMenu();
 		InsertMenu(hMenu, 0, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hSubMenuSkin, "Skin");
 		InsertMenu(hMenu, 1, MF_BYPOSITION | MF_SEPARATOR, 0, 0);
@@ -263,7 +265,8 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case IDR_Pocket_CALCULATOR:
 		case IDR_MOSCOW2024:
 		{
-			HFONT hFont = CreateFont(32, 12, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_TT_ALWAYS, CLEARTYPE_QUALITY, FF_DONTCARE, SKINFONT[skin_index - IDR_DIAMANTE_SERIAL_LIGHT]);
+			font_index = skin_index - IDR_DIAMANTE_SERIAL_LIGHT;
+			HFONT hFont = CreateFont(32, 12, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_TT_ALWAYS, CLEARTYPE_QUALITY, FF_DONTCARE, SKINFONT[font_index]);
 			SendMessage(GetDlgItem(hWnd, IDC_EDIT_DISPLAY), WM_SETFONT, (WPARAM)hFont, TRUE);
 		}break;
 		case IDR_EXIT: DestroyWindow(hWnd);
@@ -319,4 +322,14 @@ for (int i = 0; i < 18; i++)
 		i + IDC_BUTTON_0 == IDC_BUTTON_EQUAL ? g_i_BUTTON_SIZE * 2 + g_i_INTERVAL : g_i_BUTTON_SIZE, LR_LOADFROMFILE);
 	SendMessage(hButton, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hImage);
 }
+}
+VOID SetSkinFromDll(HWND hWnd, CONST CHAR* skin)
+{
+	CHAR Filename[FILENAME_MAX]{};
+	sprintf(Filename, "ButtonBMP\\%s.bmp", skin);
+	HMODULE hdll = LoadLibrary(Filename);
+
+	FreeLibrary(hdll);
+
+
 }
