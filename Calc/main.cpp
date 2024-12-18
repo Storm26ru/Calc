@@ -97,7 +97,8 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)KEYPAD[i][j], GetModuleHandle(NULL), NULL);
 			}
 		}
-		SetSkin(hWnd, "square_blue");
+		//SetSkin(hWnd, "square_blue");
+		SetSkinFromDll(hWnd, "square_blue");
 	}break;
 	case WM_COMMAND:
 	{
@@ -274,7 +275,8 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		DestroyMenu(hSubMenuSkin);
 		DestroyMenu(hSubMenuFont);
 		DestroyMenu(hMenu);
-		SetSkin(hWnd, File[color_index]);
+		//SetSkin(hWnd, File[color_index]);
+		SetSkinFromDll(hWnd, File[color_index]);
 	}break;
 	case WM_CTLCOLOREDIT:
 	{
@@ -326,9 +328,16 @@ for (int i = 0; i < 18; i++)
 VOID SetSkinFromDll(HWND hWnd, CONST CHAR* skin)
 {
 	CHAR Filename[FILENAME_MAX]{};
-	sprintf(Filename, "ButtonBMP\\%s.bmp", skin);
+	sprintf(Filename, "ButtonBMP\\%s\\%s.dll", skin,skin);
 	HMODULE hdll = LoadLibrary(Filename);
-
+	for (int i = 0; i < 18; i++)
+	{
+		HWND hButton = GetDlgItem(hWnd, IDC_BUTTON_0 + i);
+		HBITMAP hImage = (HBITMAP)LoadImage(hdll,MAKEINTRESOURCE(100+i),IMAGE_BITMAP,
+			i + IDC_BUTTON_0 == IDC_BUTTON_0 ? g_i_BUTTON_SIZE * 2 + g_i_INTERVAL : g_i_BUTTON_SIZE,
+			i + IDC_BUTTON_0 == IDC_BUTTON_EQUAL ? g_i_BUTTON_SIZE * 2 + g_i_INTERVAL : g_i_BUTTON_SIZE, NULL);
+		SendMessage(hButton, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hImage);
+	}
 	FreeLibrary(hdll);
 
 
