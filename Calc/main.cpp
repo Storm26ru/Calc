@@ -73,10 +73,19 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			GetModuleHandle(NULL),
 			NULL);
 		
-		AddFontResourceEx("Fonts\\Calc_2.ttf", FR_PRIVATE, 0);//https://learn.microsoft.com/ru-ru/windows/win32/gdi/font-and-text-functions
+		//AddFontResourceEx("Fonts\\Calc_2.ttf", FR_PRIVATE, 0);//https://learn.microsoft.com/ru-ru/windows/win32/gdi/font-and-text-functions
 		AddFontResourceEx("Fonts\\Pocket_Calculator.ttf", FR_PRIVATE, 0);
 		AddFontResourceEx("Fonts\\MOSCOW2024.otf", FR_PRIVATE, 0);
-		HFONT hFont = CreateFont(32, 12, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_TT_ALWAYS, CLEARTYPE_QUALITY, FF_DONTCARE, "MOSCOW2024");
+		
+		CHAR Filename[FILENAME_MAX]{};
+		sprintf(Filename, "Fonts\\Fonts.dll");
+		HMODULE hModule = LoadLibrary(Filename);
+		HRSRC hRsrc = FindResource(hModule, MAKEINTRESOURCE(100), MAKEINTRESOURCE(RT_FONT));
+		//LockResource(LoadResource(hModule, hRsrc));
+		DWORD Count = 0;
+		AddFontMemResourceEx(LockResource(LoadResource(hModule, hRsrc)), SizeofResource(hModule, hRsrc), 0, &Count);
+		HFONT hFont = CreateFont(32, 12, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_TT_ALWAYS, CLEARTYPE_QUALITY, FF_DONTCARE, "DiamanteSerial-Light");
+		//HFONT hFont = CreateFont(32, 12, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_TT_ALWAYS, CLEARTYPE_QUALITY, FF_DONTCARE, "MOSCOW2024");
 		SendMessage(hEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
 
 		for (int i = 0; i < 4; i++)
