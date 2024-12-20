@@ -2,15 +2,12 @@
 // Microsoft Visual C++ generated include file.
 // Used by Resource.rc
 //
-#define IDI_ICON1                       106
-
 #define IDR_SQUARE_BLUE                 110
 #define IDR_METAL_MISTRAL               111
 #define IDR_DIAMANTE_SERIAL_LIGHT       112
 #define IDR_Pocket_CALCULATOR           113
-#define IDR_MOSCOW2024				    114
-#define IDR_EXIT					    115
-
+#define IDR_MOSCOW2024                  114
+#define IDR_EXIT                        115
 #define IDC_EDIT_DISPLAY                999
 #define IDC_BUTTON_0                    1000
 #define IDC_BUTTON_1                    1001
@@ -30,7 +27,7 @@
 #define IDC_BUTTON_BSP                  1015
 #define IDC_BUTTON_CLR                  1016
 #define IDC_BUTTON_EQUAL                1017
-#define ID_BUTTON2                      40001
+#define IDI_ICON1						106
 
 // Next default values for new objects
 // 

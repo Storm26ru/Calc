@@ -20,15 +20,17 @@ VOID SetSkinFromDll(HWND hWnd, CONST CHAR* skin);
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, INT nCmdShow)
 {
+	
+	HINSTANCE hIcon = LoadLibrary("ButtonBMP\\square_blue.dll");
+	
 	WNDCLASSEX wClass;
 	ZeroMemory(&wClass, sizeof(wClass));
 	wClass.style = 0;
 	wClass.cbSize = sizeof(wClass);
 	wClass.cbClsExtra = 0;
 	wClass.cbWndExtra = 0;
-
-	wClass.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
-	wClass.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
+	wClass.hIcon = LoadIcon(hIcon, MAKEINTRESOURCE(IDI_ICON1));
+	wClass.hIconSm = LoadIcon(hIcon, MAKEINTRESOURCE(IDI_ICON1));
 	wClass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wClass.hbrBackground = CreateSolidBrush(RGB(255, 255, 255));
 
@@ -52,7 +54,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-
+	FreeLibrary(hIcon);
 	return msg.wParam;
 }
 
@@ -74,20 +76,22 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			NULL);
 		
 		//AddFontResourceEx("Fonts\\Calc_2.ttf", FR_PRIVATE, 0);//https://learn.microsoft.com/ru-ru/windows/win32/gdi/font-and-text-functions
-		AddFontResourceEx("Fonts\\Pocket_Calculator.ttf", FR_PRIVATE, 0);
-		AddFontResourceEx("Fonts\\MOSCOW2024.otf", FR_PRIVATE, 0);
+		//AddFontResourceEx("Fonts\\Pocket_Calculator.ttf", FR_PRIVATE, 0);
+		//AddFontResourceEx("Fonts\\MOSCOW2024.otf", FR_PRIVATE, 0);
 		
 		CHAR Filename[FILENAME_MAX]{};
 		sprintf(Filename, "Fonts\\Fonts.dll");
 		HMODULE hModule = LoadLibrary(Filename);
-		HRSRC hRsrc = FindResource(hModule, MAKEINTRESOURCE(100), MAKEINTRESOURCE(RT_FONT));
-		//LockResource(LoadResource(hModule, hRsrc));
-		DWORD Count = 0;
-		AddFontMemResourceEx(LockResource(LoadResource(hModule, hRsrc)), SizeofResource(hModule, hRsrc), 0, &Count);
-		HFONT hFont = CreateFont(32, 12, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_TT_ALWAYS, CLEARTYPE_QUALITY, FF_DONTCARE, "DiamanteSerial-Light");
-		//HFONT hFont = CreateFont(32, 12, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_TT_ALWAYS, CLEARTYPE_QUALITY, FF_DONTCARE, "MOSCOW2024");
+		for (int i = 0; i < 3; i++)
+		{
+			DWORD Count = i;
+			HRSRC hRsrc = FindResource(hModule, MAKEINTRESOURCE(100+i), MAKEINTRESOURCE(RT_FONT));
+			AddFontMemResourceEx(LockResource(LoadResource(hModule, hRsrc)), SizeofResource(hModule, hRsrc), 0, &Count);
+		}
+		FreeLibrary(hModule);
+		HFONT hFont = CreateFont(32, 12, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_TT_ALWAYS, CLEARTYPE_QUALITY, FF_DONTCARE, "MOSCOW2024");
 		SendMessage(hEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
-
+		
 		for (int i = 0; i < 4; i++)
 		{
 			for (int j = 0; j < 5; j++)
@@ -150,7 +154,7 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		if (LOWORD(wParam) == IDC_BUTTON_CLR)
 		{
-			a = b = DBL_MIN;
+			a = b = 0;
 			operation = 0;
 			input = operation_input = FALSE;
 			ZeroMemory(sz_display, sizeof(sz_display));
@@ -320,29 +324,29 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 CONST CHAR* button_image[]{ "button_0","button_1","button_2","button_3","button_4","button_5",
 							"button_6","button_7","button_8","button_9","button_point","button_plus",
 							"button_minus","button_aster","button_slash","button_bsp","button_clr","button_equal" };
-
-VOID SetSkin(HWND hWnd, CONST CHAR* skin)
-{
-	CHAR Filename[FILENAME_MAX]{}; https://learn.microsoft.com/ru-ru/cpp/c-runtime-library/filename-max?view=msvc-17
-for (int i = 0; i < 18; i++)
-{
-	sprintf(Filename, "ButtonBMP\\%s\\%s.bmp", skin, button_image[i]);
-	HWND hButton = GetDlgItem(hWnd, IDC_BUTTON_0 + i);
-	HBITMAP hImage = (HBITMAP)LoadImage(NULL, Filename, IMAGE_BITMAP,
-		i + IDC_BUTTON_0 == IDC_BUTTON_0 ? g_i_BUTTON_SIZE * 2 + g_i_INTERVAL : g_i_BUTTON_SIZE,
-		i + IDC_BUTTON_0 == IDC_BUTTON_EQUAL ? g_i_BUTTON_SIZE * 2 + g_i_INTERVAL : g_i_BUTTON_SIZE, LR_LOADFROMFILE);
-	SendMessage(hButton, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hImage);
-}
-}
+//
+//VOID SetSkin(HWND hWnd, CONST CHAR* skin)
+//{
+//	CHAR Filename[FILENAME_MAX]{}; https://learn.microsoft.com/ru-ru/cpp/c-runtime-library/filename-max?view=msvc-17
+//for (int i = 0; i < 18; i++)
+//{
+//	sprintf(Filename, "ButtonBMP\\%s\\%s.bmp", skin, button_image[i]);
+//	HWND hButton = GetDlgItem(hWnd, IDC_BUTTON_0 + i);
+//	HBITMAP hImage = (HBITMAP)LoadImage(NULL, Filename, IMAGE_BITMAP,
+//		i + IDC_BUTTON_0 == IDC_BUTTON_0 ? g_i_BUTTON_SIZE * 2 + g_i_INTERVAL : g_i_BUTTON_SIZE,
+//		i + IDC_BUTTON_0 == IDC_BUTTON_EQUAL ? g_i_BUTTON_SIZE * 2 + g_i_INTERVAL : g_i_BUTTON_SIZE, LR_LOADFROMFILE);
+//	SendMessage(hButton, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hImage);
+//}
+//}
 VOID SetSkinFromDll(HWND hWnd, CONST CHAR* skin)
 {
 	CHAR Filename[FILENAME_MAX]{};
-	sprintf(Filename, "ButtonBMP\\%s\\%s.dll", skin,skin);
+	sprintf(Filename, "ButtonBMP\\%s.dll", skin);
 	HMODULE hdll = LoadLibrary(Filename);
 	for (int i = 0; i < 18; i++)
 	{
 		HWND hButton = GetDlgItem(hWnd, IDC_BUTTON_0 + i);
-		HBITMAP hImage = (HBITMAP)LoadImage(hdll,MAKEINTRESOURCE(100+i),IMAGE_BITMAP,
+		HBITMAP hImage = (HBITMAP)LoadImage(hdll,MAKEINTRESOURCE(IDC_BUTTON_0+i),IMAGE_BITMAP,
 			i + IDC_BUTTON_0 == IDC_BUTTON_0 ? g_i_BUTTON_SIZE * 2 + g_i_INTERVAL : g_i_BUTTON_SIZE,
 			i + IDC_BUTTON_0 == IDC_BUTTON_EQUAL ? g_i_BUTTON_SIZE * 2 + g_i_INTERVAL : g_i_BUTTON_SIZE, NULL);
 		SendMessage(hButton, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hImage);
