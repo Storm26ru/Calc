@@ -79,9 +79,10 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		//AddFontResourceEx("Fonts\\Pocket_Calculator.ttf", FR_PRIVATE, 0);
 		//AddFontResourceEx("Fonts\\MOSCOW2024.otf", FR_PRIVATE, 0);
 		
-		CHAR Filename[FILENAME_MAX]{};
-		sprintf(Filename, "Fonts\\Fonts.dll");
-		HMODULE hModule = LoadLibrary(Filename);
+		//CHAR Filename[FILENAME_MAX]{};
+		//sprintf(Filename, "Fonts\\Fonts.dll");
+		//HMODULE hModule = LoadLibrary(Filename);
+		HMODULE hModule = LoadLibrary("Fonts\\Fonts.dll");
 		for (int i = 0; i < 3; i++)
 		{
 			DWORD Count = i;
