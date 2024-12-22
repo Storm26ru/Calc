@@ -162,7 +162,7 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		if (LOWORD(wParam) >= IDC_BUTTON_PLUS && LOWORD(wParam) <= IDC_BUTTON_SLASH)
 		{
-			if (input && a == DBL_MIN)a = atof(sz_display);
+			if (input && a == 0)a = atof(sz_display);
 			if (operation && input) SendMessage(hWnd, WM_COMMAND, LOWORD(IDC_BUTTON_EQUAL), 0);
 			operation = LOWORD(wParam);
 			operation_input = TRUE;
