@@ -14,13 +14,16 @@ CONST CHAR* CAPTION[4][5] = { {"7","8","9","/","<-"},{"4","5","6","*","C"},{"1",
 CONST CHAR* g_OPERATION[]{ "+","-","*","/" };
 
 INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-VOID SetSkin(HWND hWnd, CONST CHAR* skin);
 VOID SetSkinFromDll(HWND hWnd, CONST CHAR* skin);
+INT SetReg(INT index,CONST CHAR* NameValue, UINT uMsg);
+
+
 
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, INT nCmdShow)
 {
-	
+
+
 	HINSTANCE hIcon = LoadLibrary("ButtonBMP\\square_blue.dll");
 	
 	WNDCLASSEX wClass;
@@ -76,21 +79,17 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			NULL);
 		
 		//AddFontResourceEx("Fonts\\Calc_2.ttf", FR_PRIVATE, 0);//https://learn.microsoft.com/ru-ru/windows/win32/gdi/font-and-text-functions
-		//AddFontResourceEx("Fonts\\Pocket_Calculator.ttf", FR_PRIVATE, 0);
-		//AddFontResourceEx("Fonts\\MOSCOW2024.otf", FR_PRIVATE, 0);
-		
-		//CHAR Filename[FILENAME_MAX]{};
-		//sprintf(Filename, "Fonts\\Fonts.dll");
-		//HMODULE hModule = LoadLibrary(Filename);
+				
 		HMODULE hModule = LoadLibrary("Fonts\\Fonts.dll");
-		for (int i = 0; i < 3; i++)
+		for (int i = IDR_DIAMANTE_SERIAL_LIGHT; i <= IDR_MOSCOW2024; i++)
 		{
-			DWORD Count = i;
-			HRSRC hRsrc = FindResource(hModule, MAKEINTRESOURCE(100+i), MAKEINTRESOURCE(RT_FONT));
+			DWORD Count = i-IDR_DIAMANTE_SERIAL_LIGHT;
+			HRSRC hRsrc = FindResource(hModule, MAKEINTRESOURCE(i), MAKEINTRESOURCE(RT_FONT));
 			AddFontMemResourceEx(LockResource(LoadResource(hModule, hRsrc)), SizeofResource(hModule, hRsrc), 0, &Count);
 		}
 		FreeLibrary(hModule);
-		HFONT hFont = CreateFont(32, 12, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_TT_ALWAYS, CLEARTYPE_QUALITY, FF_DONTCARE, "MOSCOW2024");
+		font_index = SetReg(font_index, REG_FONT, uMsg);
+		HFONT hFont = CreateFont(32, 12, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_TT_ALWAYS, CLEARTYPE_QUALITY, FF_DONTCARE, SKINFONT[font_index]);
 		SendMessage(hEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
 		
 		for (int i = 0; i < 4; i++)
@@ -111,8 +110,8 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)KEYPAD[i][j], GetModuleHandle(NULL), NULL);
 			}
 		}
-		//SetSkin(hWnd, "square_blue");
-		SetSkinFromDll(hWnd, "square_blue");
+		color_index = SetReg(color_index,REG_COLOR,uMsg);
+		SetSkinFromDll(hWnd, File[color_index]);
 	}break;
 	case WM_COMMAND:
 	{
@@ -265,15 +264,13 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch (skin_index)
 		{
 		case IDR_SQUARE_BLUE:
-		case IDR_METAL_MISTRAL:// color_index = skin_index - IDR_SQUARE_BLUE; 
+		case IDR_METAL_MISTRAL:
 		{
 			color_index = skin_index - IDR_SQUARE_BLUE;
 			HWND hEditDisplay = GetDlgItem(hWnd, IDC_EDIT_DISPLAY);
 			HDC hdcDisplay = GetDC(hEditDisplay);
-			//SendMessage(hWnd, WM_CTLCOLOREDIT, (WPARAM)GetDC(GetDlgItem(hWnd, IDC_EDIT_DISPLAY)), (LPARAM)GetDlgItem(hWnd, IDC_EDIT_DISPLAY));
 			SendMessage(hWnd, WM_CTLCOLOREDIT, (WPARAM)hdcDisplay, (LPARAM)hEditDisplay);
 			ReleaseDC(hEditDisplay, hdcDisplay);
-			//SetSkin(hWnd, File[color_index]);
 		}
 		break;
 		case IDR_DIAMANTE_SERIAL_LIGHT:
@@ -289,7 +286,6 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		DestroyMenu(hSubMenuSkin);
 		DestroyMenu(hSubMenuFont);
 		DestroyMenu(hMenu);
-		//SetSkin(hWnd, File[color_index]);
 		SetSkinFromDll(hWnd, File[color_index]);
 	}break;
 	case WM_CTLCOLOREDIT:
@@ -314,8 +310,11 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		HDC hdc = GetDC(hEdit);
 		ReleaseDC(hEdit, hdc);
 		PostQuitMessage(0);
+		SetReg(color_index, REG_COLOR, uMsg);
+		SetReg(font_index, REG_FONT, uMsg);
 	}
-	case WM_CLOSE: DestroyWindow(hWnd);
+	case WM_CLOSE: 
+		DestroyWindow(hWnd);
 	default: return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 
@@ -325,34 +324,41 @@ INT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 CONST CHAR* button_image[]{ "button_0","button_1","button_2","button_3","button_4","button_5",
 							"button_6","button_7","button_8","button_9","button_point","button_plus",
 							"button_minus","button_aster","button_slash","button_bsp","button_clr","button_equal" };
-//
-//VOID SetSkin(HWND hWnd, CONST CHAR* skin)
-//{
-//	CHAR Filename[FILENAME_MAX]{}; https://learn.microsoft.com/ru-ru/cpp/c-runtime-library/filename-max?view=msvc-17
-//for (int i = 0; i < 18; i++)
-//{
-//	sprintf(Filename, "ButtonBMP\\%s\\%s.bmp", skin, button_image[i]);
-//	HWND hButton = GetDlgItem(hWnd, IDC_BUTTON_0 + i);
-//	HBITMAP hImage = (HBITMAP)LoadImage(NULL, Filename, IMAGE_BITMAP,
-//		i + IDC_BUTTON_0 == IDC_BUTTON_0 ? g_i_BUTTON_SIZE * 2 + g_i_INTERVAL : g_i_BUTTON_SIZE,
-//		i + IDC_BUTTON_0 == IDC_BUTTON_EQUAL ? g_i_BUTTON_SIZE * 2 + g_i_INTERVAL : g_i_BUTTON_SIZE, LR_LOADFROMFILE);
-//	SendMessage(hButton, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hImage);
-//}
-//}
+
 VOID SetSkinFromDll(HWND hWnd, CONST CHAR* skin)
 {
 	CHAR Filename[FILENAME_MAX]{};
 	sprintf(Filename, "ButtonBMP\\%s.dll", skin);
 	HMODULE hdll = LoadLibrary(Filename);
-	for (int i = 0; i < 18; i++)
+	for (int i = IDC_BUTTON_0; i <= IDC_BUTTON_EQUAL; i++)
 	{
-		HWND hButton = GetDlgItem(hWnd, IDC_BUTTON_0 + i);
-		HBITMAP hImage = (HBITMAP)LoadImage(hdll,MAKEINTRESOURCE(IDC_BUTTON_0+i),IMAGE_BITMAP,
-			i + IDC_BUTTON_0 == IDC_BUTTON_0 ? g_i_BUTTON_SIZE * 2 + g_i_INTERVAL : g_i_BUTTON_SIZE,
-			i + IDC_BUTTON_0 == IDC_BUTTON_EQUAL ? g_i_BUTTON_SIZE * 2 + g_i_INTERVAL : g_i_BUTTON_SIZE, NULL);
+		HWND hButton = GetDlgItem(hWnd, i);
+		HBITMAP hImage = (HBITMAP)LoadImage(hdll,MAKEINTRESOURCE(i),IMAGE_BITMAP,
+			i == IDC_BUTTON_0 ? g_i_BUTTON_SIZE * 2 + g_i_INTERVAL : g_i_BUTTON_SIZE,
+			i == IDC_BUTTON_EQUAL ? g_i_BUTTON_SIZE * 2 + g_i_INTERVAL : g_i_BUTTON_SIZE, NULL);
 		SendMessage(hButton, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hImage);
 	}
 	FreeLibrary(hdll);
-
-
+}
+INT SetReg(INT index, CONST CHAR* NameValue, UINT uMsg)
+{
+	HKEY phkResult;
+	if (RegCreateKeyEx(HKEY_CURRENT_USER, "Software\\Calc_VPD_311",
+		0, NULL, REG_OPTION_NON_VOLATILE,KEY_SET_VALUE|KEY_READ, NULL, &phkResult,NULL) != ERROR_SUCCESS)
+	{
+		MessageBox(NULL, "RegCreate faled", NULL, MB_OK | MB_ICONERROR);
+	}
+	switch (uMsg)
+	{
+	case WM_CREATE:
+	{	
+			DWORD dwvalue = sizeof(index);
+			DWORD tupe = REG_DWORD;
+			RegQueryValueEx(phkResult, NameValue, 0, &tupe, (LPBYTE)&index, &dwvalue);
+			return index;
+	}
+	case WM_DESTROY:
+			RegSetValueEx(phkResult, NameValue, 0, REG_DWORD, (LPBYTE)&index, sizeof(index));
+	}
+	RegCloseKey(phkResult);
 }
